@@ -1,0 +1,20 @@
+starwars_env/
+# Python compiled files
+__pycache__/
+__pycache__
+*__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+.DS_Store
+
+# SQLite database files
+*.sqlite3
+
+# Media and static files
+media/
+
+# Sensitive files
+.env
+env.py
