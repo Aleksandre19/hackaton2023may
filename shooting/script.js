@@ -35,14 +35,28 @@ const grabElementRotation = () => {
 }
 
 
+const moveLaser = (event, coursorX, coursorY) => {
+    laser.style.left = `${(coursorX - grabElementRotation()) - 25}px`;
+    laser.style.top = `${coursorY + grabElementRotation()}px`;
+}
+
+
+const fadeIn = (event) => {
+    const coursorX = getPos(event).x
+    const coursorY = getPos(event).y
+    laser.style.opacity = '0';
+    laser.style.transition = 'opacity 0.5s ease-in-out';
+    laser.style.opacity = '1';
+    laser.addEventListener('transitionend', (event) => {
+        if (event.propertyName === 'opacity') {
+            moveLaser(event, coursorX, coursorY)
+        }
+    })
+}
+
+
 const shoot = (event) => {
-
-
-
-    console.log(grabElementRotation());
-    
-    laser.style.left = `${(getPos(event).x - grabElementRotation()) - 25}px`;
-    laser.style.top = `${getPos(event).y + grabElementRotation()}px`;
+    fadeIn(event)
 }
 
 
