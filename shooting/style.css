@@ -17,13 +17,14 @@
 
 #laser {
     position: absolute;
-    right: 200px;
-    bottom: 50px;
+    top: 80%;
+    left: 80%;
     width: 25px;
     height: 70px;
     background-color: red;
     border-radius: 8px;
     opacity: 0;
+    
     /* transition: all 0.5 ease-in-out;
     transform: rotate(-35deg); */
 }

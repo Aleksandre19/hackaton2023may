@@ -35,7 +35,7 @@ const grabElementRotation = () => {
 }
 
 
-const moveLaser = (event, coursorX, coursorY) => {
+const moveLaser = (coursorX, coursorY) => {
     laser.style.left = `${(coursorX - grabElementRotation()) - 25}px`;
     laser.style.top = `${coursorY + grabElementRotation()}px`;
 }
@@ -49,7 +49,7 @@ const fadeIn = (event) => {
     laser.style.opacity = '1';
     laser.addEventListener('transitionend', (event) => {
         if (event.propertyName === 'opacity') {
-            moveLaser(event, coursorX, coursorY)
+            moveLaser(coursorX, coursorY)
         }
     })
 }
