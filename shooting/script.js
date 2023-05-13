@@ -1,91 +1,132 @@
-const container = document.getElementById('container')
-const sniper = document.getElementById('sniper-target')
-const laser = document.getElementById('laser')
-const style = window.getComputedStyle(laser);
-// Hide cursor
-document.body.style.cursor = 'none';
+const container = document.getElementById('container');
+const sparkleNum = 15;
+const radius = 2;
+const height = 10;
+const width = 3;
+const color = ['red', 'blue', 'yellow']
+let maxHeight = 40;
+let target = true;
 
-// Get X and Y coordinates based on the device type.
-const getPos = (event) => {
 
+function degToRad(deg) {
+    return deg / 180 * Math.PI;
+}
+
+
+function randomRange(min, max) {
+    return Math.floor(Math.random() * (max - min) + min);
+}
+
+
+function getPos(event){
   const evt = {
     x: event.type.includes('mouse') ? event.pageX : event.touches[0].clientX,
     y: event.type.includes('mouse') ? event.pageY : event.touches[0].clientY
   }
-
   return evt;
 }
 
 
-const asignTargetToMouse = (event) => {
-    sniper.style.left = `${getPos(event).x - 30}px`;
-    sniper.style.top = `${getPos(event).y - 30}px`;
+function defineElement(container, className){
+    const elm = document.createElement('div');
+    elm.className = className;
+    container.appendChild(elm);
 }
 
 
-const grabElementRotation = () => {
-    const transform = style.transform;
-    const match = /matrix\((.+)\)/.exec(transform);
-    const values = match[1].split(', ').map(parseFloat);
-    const a = values[0];
-    const b = values[1];
-    const rotationInRadians = Math.atan2(b, a);
-    const rotationInDegrees = rotationInRadians * (180 / Math.PI);
-    return rotationInDegrees
+function createSingleSparkle(quantitly){
+    for (let i = 0; i < quantitly; i++){
+        defineElement(container, 'single-sparkle')
+    }
+}
+createSingleSparkle(sparkleNum);
+
+
+function grabSparkles(){
+    const sparkleCollection = document.querySelectorAll('.single-sparkle');
+    const sparkles = Array.from(sparkleCollection);
+    return sparkles
 }
 
 
-const moveLaser = (coursorX, coursorY) => {
-    laser.style.left = `${(coursorX - grabElementRotation()) - 25}px`;
-    laser.style.top = `${coursorY + grabElementRotation()}px`;
+const slice = 360 / sparkleNum;
+let i = 0;
+function sparklesProperties(height, width, color) {
+    grabSparkles().forEach(sparkle => {  
+        const deg = (360 / sparkleNum) * i;
+        sparkle.style.transformOrigin = `center top`;
+        sparkle.style.transform = `rotate(${deg}deg)`;
+        sparkle.style.height = `${randomRange((height/3), height)}px`;
+        sparkle.style.width = `${randomRange((width / 4), width)}px`;
+        sparkle.style.backgroundColor = `${color[randomRange(0, color.length - 1)]}`;
+        i++;
+    })
 }
+sparklesProperties(height, width, color);
 
 
-const fadeIn = (event) => {
-    const coursorX = getPos(event).x
-    const coursorY = getPos(event).y
-    laser.style.opacity = '0';
-    laser.style.transition = 'opacity 0.5s ease-in-out';
-    laser.style.opacity = '1';
-    laser.addEventListener('transitionend', (event) => {
-        if (event.propertyName === 'opacity') {
-            moveLaser(coursorX, coursorY)
-        }
+function sparkleAroundMouse(event,x, y, radius) {
+     grabSparkles().forEach(sparkle => {
+        const currentX = x
+        const currentY = y
+
+        const angle = slicesInRad * j;
+        xWithRadius = currentX + radius * Math.cos(angle);
+        yWithRadius = currentY + radius * Math.sin(angle);
+
+        sparkle.style.left = `${xWithRadius}px`;
+        sparkle.style.top = `${yWithRadius}px`;
+        j++;
     })
 }
 
 
-const shoot = (event) => {
-    fadeIn(event)
+let j = 0;
+let xWithRadius, yWithRadius;
+const slicesInRad = degToRad(slice);
+function asignTargetToMouse(event){
+    sparkleAroundMouse(
+        event,
+        getPos(event).x,
+        getPos(event).y,
+        radius
+    );
 }
 
 
-const fractions = (event) => {
-    const fractions = {}
-    // Input X axis
-    input.mouseX.current = getPos(event).x
-    fractions.x = input.mouseX.fraction = (input.mouseX.current - input.mouseX.start) / input.mouseX.range;
+function sparkleTransition() {
+    grabSparkles().forEach(sparkle => {
+        sparkle.style.opacity = '1';
+        sparkle.style.transition = `
+        height 0.1s ease-in-out,
+        width 0.1s ease-in-out,
+        opacity 0.1s ease-in-out`;
 
-    // Input Y axis
-    input.mouseY.current = getPos(event).y;
-    fractions.y = input.mouseY.fraction = (input.mouseY.current - input.mouseY.start) / input.mouseY.range;
-    
-    return fractions
+        sparkle.addEventListener('transitionend', () => {
+            sparkle.style.opacity = '0';
+            maxHeight = 40;
+        })
+    })
+
 }
 
-const followToMouse = (event) => {
-    output.x.current = output.x.start + (fractions(event).x * output.x.range);
-    laser.style.transformOrigin = 'center bottom';
-    laser.style.transform = `rotate(${output.x.current}deg)`;
-}
 
 container.addEventListener('mousemove', (event) => {
     asignTargetToMouse(event);
-    followToMouse(event);
 })
+
 
 container.addEventListener('mousedown', (event) => {
-    shoot(event)
+    const x =  getPos(event).x
+    const y =  getPos(event).y
+    maxHeight = maxHeight * (y / window.innerHeight) + 10
+    sparkleAroundMouse(event, x, y, radius);
 })
 
-
+container.addEventListener('click', (event) => {
+    if (target) {
+        sparkleAroundMouse(event, 40);
+        sparkleTransition();
+        sparklesProperties(maxHeight, width, color);
+    }
+})
